@@ -138,7 +138,7 @@ export default function PlanScreen({ navigation, route }: PlanScreenProps) {
         [
           {
             text: 'OK',
-            onPress: () => navigation.goBack()
+            onPress: () => navigation.navigate('Home')
           }
         ]
       );
