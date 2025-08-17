@@ -12,15 +12,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { database, MedicinePlan } from '../database';
 import { globalStyles, colors } from '../styles';
 import { scheduleNotification, cancelNotification, processDailyMedicationUpdates } from '../notifications';
 
-interface HomeScreenProps {
-  navigation: any;
-}
-
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen() {
+  const router = useRouter();
   const [plans, setPlans] = useState<MedicinePlan[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPlans, setFilteredPlans] = useState<MedicinePlan[]>([]);
@@ -87,11 +85,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   const navigateToPlan = () => {
-    navigation.navigate('Plan');
+    router.push('./PlanScreen');
   };
 
   const navigateToInfo = (plan: MedicinePlan) => {
-    navigation.navigate('InfoEdit', { plan });
+    router.push({
+      pathname: './InfoEditScreen',
+      params: { planId: plan.id?.toString() }
+    });
   };
 
   const formatFoodTiming = (timing: string) => {

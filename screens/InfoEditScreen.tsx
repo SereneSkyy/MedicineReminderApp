@@ -8,20 +8,48 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MedicinePlan, database } from '../database';
 import { globalStyles, colors } from '../styles';
 import { cancelNotification } from '../notifications';
 
-interface InfoEditScreenProps {
-  navigation: any;
-  route: any;
-}
-
-export default function InfoEditScreen({ navigation, route }: InfoEditScreenProps) {
-  const { plan }: { plan: MedicinePlan } = route.params;
+export default function InfoEditScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const planId = params.planId as string;
+  
+  const [plan, setPlan] = React.useState<MedicinePlan | null>(null);
+  
+  React.useEffect(() => {
+    const loadPlan = async () => {
+      if (planId) {
+        try {
+          const allPlans = await database.getAllPlans();
+          const loadedPlan = allPlans.find(p => p.id === parseInt(planId));
+          setPlan(loadedPlan || null);
+        } catch (error) {
+          console.error('Error loading plan:', error);
+        }
+      }
+    };
+    loadPlan();
+  }, [planId]);
+  
+  if (!plan) {
+    return (
+      <SafeAreaView style={globalStyles.safeArea}>
+        <View style={globalStyles.container}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const handleEdit = () => {
-    navigation.navigate('Plan', { plan });
+    router.push({
+      pathname: './PlanScreen',
+      params: { plan: JSON.stringify(plan) }
+    });
   };
 
   const handleDelete = () => {
@@ -41,7 +69,7 @@ export default function InfoEditScreen({ navigation, route }: InfoEditScreenProp
               await database.deletePlan(plan.id!);
               await cancelNotification(`plan_${plan.id}`);
               Alert.alert('Success', 'Medicine plan deleted successfully');
-              navigation.goBack();
+              router.back();
             } catch (error) {
               console.error('Error deleting plan:', error);
               Alert.alert('Error', 'Failed to delete medicine plan');
@@ -78,7 +106,7 @@ export default function InfoEditScreen({ navigation, route }: InfoEditScreenProp
       <View style={globalStyles.container}>
         <View style={globalStyles.header}>
           <View style={globalStyles.row}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={24} color={colors.white} />
             </Pressable>
             <Text style={[globalStyles.headerTitle, { flex: 1, marginLeft: 16 }]}>

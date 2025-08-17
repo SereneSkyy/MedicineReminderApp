@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { database, MedicinePlan } from '../database';
 import { globalStyles, colors } from '../styles';
 import {
@@ -19,13 +20,10 @@ import {
   cancelNotification
 } from '../notifications';
 
-interface PlanScreenProps {
-  navigation: any;
-  route: any;
-}
-
-export default function PlanScreen({ navigation, route }: PlanScreenProps) {
-  const editingPlan = route.params?.plan;
+export default function PlanScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const editingPlan = params.plan ? JSON.parse(params.plan as string) : null;
   const isEditing = !!editingPlan;
 
   const [medicineName, setMedicineName] = useState(editingPlan?.name || '');
@@ -138,7 +136,7 @@ export default function PlanScreen({ navigation, route }: PlanScreenProps) {
         [
           {
             text: 'OK',
-            onPress: () => navigation.goBack()
+            onPress: () => router.back()
           }
         ]
       );
@@ -196,7 +194,7 @@ export default function PlanScreen({ navigation, route }: PlanScreenProps) {
       <View style={globalStyles.container}>
         <View style={globalStyles.header}>
           <View style={globalStyles.row}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={24} color={colors.white} />
             </Pressable>
             <Text style={[globalStyles.headerTitle, { flex: 1, marginLeft: 16 }]}>
